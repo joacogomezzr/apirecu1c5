@@ -1,47 +1,79 @@
+// api_hexagonal_go/internal/book/interface/book_handler.go
 package interfaces
 
 import (
 	"api-joaquin/internal/book/controllers"
 	"api-joaquin/internal/book/domain"
 	"database/sql"
+	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-// BookHandler maneja las peticiones HTTP relacionadas con libros.
 type BookHandler struct {
 	Controller *controllers.BookController
 }
 
-// NewBookHandler crea un nuevo manejador.
 func NewBookHandler(controller *controllers.BookController) *BookHandler {
 	return &BookHandler{Controller: controller}
 }
 
-// CreateBook maneja la creación de un nuevo libro.
 func (h *BookHandler) CreateBook(c *fiber.Ctx) error {
-	book := new(domain.Book)
-	if err := c.BodyParser(book); err != nil {
-		return c.Status(400).JSON(fiber.Map{
+	type BookRequest struct {
+		Title  string `json:"title"`
+		Author string `json:"author"`
+		Year   int    `json:"year"`
+	}
+
+	var req BookRequest
+
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  "error",
-			"message": "Solicitud inválida. Verifique los datos enviados.",
+			"message": "Error al parsear los datos del libro",
 			"error":   err.Error(),
 		})
+	}
+
+	if req.Title == "" || req.Author == "" || req.Year == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Todos los campos son requeridos (título, autor, año)",
+		})
+	}
+
+	currentYear := time.Now().Year()
+	if req.Year < 1000 || req.Year > currentYear {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  "error",
+			"message": fmt.Sprintf("El año debe estar entre 1000 y %d", currentYear),
+		})
+	}
+
+	book := &domain.Book{
+		Title:  req.Title,
+		Author: req.Author,
+		Year:   req.Year,
 	}
 
 	if err := h.Controller.PostUseCase.Execute(book); err != nil {
-		return c.Status(500).JSON(fiber.Map{
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  "error",
-			"message": "No se pudo crear el libro.",
+			"message": "Error al guardar el libro en la base de datos",
 			"error":   err.Error(),
 		})
 	}
 
-	return c.Status(201).JSON(fiber.Map{
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"status":  "success",
-		"message": "Libro creado exitosamente.",
-		"data":    book,
+		"message": "Libro creado exitosamente",
+		"data": fiber.Map{
+			"title":  book.Title,
+			"author": book.Author,
+			"year":   book.Year,
+		},
 	})
 }
 

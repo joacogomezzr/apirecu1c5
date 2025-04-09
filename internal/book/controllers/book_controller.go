@@ -1,3 +1,4 @@
+//api_hexagonal_go/internal/book/controllers/book_controller.go
 package controllers
 
 import (
@@ -5,7 +6,7 @@ import (
 	"api-joaquin/internal/book/domain/repositories"
 )
 
-// inyección de dependencias.
+
 type BookController struct {
 	PostUseCase   *application.BookPostUseCase
 	GetUseCase    *application.BookGetUseCase
@@ -13,7 +14,6 @@ type BookController struct {
 	DeleteUseCase *application.BookDeleteUseCase
 }
 
-// inicializar el controlador con las dependencias.
 func NewBookController(repo repositories.BookRepository) *BookController {
 	return &BookController{
 		PostUseCase:   application.NewBookPostUseCase(repo),

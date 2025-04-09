@@ -1,22 +1,17 @@
-//api-joaqui/pkg/middleware/middleware.go
+// api-joaquin/pkg/middleware/middleware.go
 package middleware
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 // SetupCORS configura los encabezados CORS
 func SetupCORS() fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		c.Set("Access-Control-Allow-Origin", "*")
-		c.Set("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
-		c.Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		
-		// Manejo de preflight request
-		if c.Method() == "OPTIONS" {
-			return c.SendStatus(fiber.StatusNoContent)
-		}
-		
-		return c.Next()
-	}
+	return cors.New(cors.Config{
+		AllowOrigins:     "http://localhost:5173, http://127.0.0.1:5173",
+		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+		AllowMethods:     "GET, POST, PUT, DELETE",
+		AllowCredentials: true,
+	})
 }

@@ -1,8 +1,9 @@
+//api_hexagonal_go/internal/book/domain/repositories/book_repository.go
 package repositories
 
 import "api-joaquin/internal/book/domain"
 
-// BookRepository define los métodos que debe implementar el repositorio.
+
 type BookRepository interface {
 	Create(book *domain.Book) error
 	GetAll() ([]domain.Book, error)
