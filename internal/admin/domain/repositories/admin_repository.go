@@ -1,3 +1,4 @@
+//api_hexagonal_go/internal/admin/domain/repositories/admin_repository.go
 package repositories
 
 import "api-joaquin/internal/admin/domain"
