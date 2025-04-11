@@ -9,42 +9,51 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// AdminHandler maneja las peticiones HTTP relacionadas con administradores.
 type AdminHandler struct {
 	Controller *controllers.AdminController
 }
 
-// NewAdminHandler crea un nuevo manejador.
 func NewAdminHandler(controller *controllers.AdminController) *AdminHandler {
 	return &AdminHandler{Controller: controller}
 }
 
-// CreateAdmin maneja el registro de un nuevo administrador.
 func (h *AdminHandler) CreateAdmin(c *fiber.Ctx) error {
 	admin := new(domain.Admin)
 	if err := c.BodyParser(admin); err != nil {
-		return c.Status(400).JSON(fiber.Map{
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"status":  "error",
-			"message": "Solicitud inválida. Verifique los datos enviados.",
+			"message": "Datos de administrador inválidos",
 			"error":   err.Error(),
+		})
+	}
+
+	if admin.Name == "" || admin.Email == "" || admin.Password == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Nombre, email y contraseña son requeridos",
 		})
 	}
 
 	if err := h.Controller.PostUseCase.Execute(admin); err != nil {
-		return c.Status(500).JSON(fiber.Map{
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  "error",
-			"message": "No se pudo registrar el administrador.",
+			"message": "Error al registrar administrador",
 			"error":   err.Error(),
 		})
 	}
 
-	return c.Status(201).JSON(fiber.Map{
+	responseData := fiber.Map{
+		"id":    admin.ID,
+		"name":  admin.Name,
+		"email": admin.Email,
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"status":  "success",
-		"message": "Administrador registrado exitosamente.",
-		"data":    admin,
+		"message": "Administrador registrado exitosamente",
+		"data":    responseData,
 	})
 }
-
 // GetAdmins maneja la obtención de administradores.
 func (h *AdminHandler) GetAdmins(c *fiber.Ctx) error {
 	admins, err := h.Controller.GetUseCase.Execute()

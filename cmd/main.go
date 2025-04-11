@@ -21,10 +21,7 @@ import (
 	adminInterfaces "api-joaquin/internal/admin/interface"
 	adminRoutes "api-joaquin/internal/admin/routes"
 
-	mailControllers "api-joaquin/internal/mailer/controllers"
 	mailInfrastructure "api-joaquin/internal/mailer/infrastructure"
-	mailInterfaces "api-joaquin/internal/mailer/interfaces"
-	mailRoutes "api-joaquin/internal/mailer/routes"
 )
 
 func main() {
@@ -59,18 +56,14 @@ func main() {
 	bookController := bookControllers.NewBookController(bookRepo)
 	bookHandler := bookInterfaces.NewBookHandler(bookController)
 
+	mailService := mailInfrastructure.NewMailService() // Servicio de correo
 	adminRepo := adminInfrastructure.NewAdminService(database.DB)
-	adminController := adminControllers.NewAdminController(adminRepo)
+	adminController := adminControllers.NewAdminController(adminRepo, mailService) // Pasamos mailService
 	adminHandler := adminInterfaces.NewAdminHandler(adminController)
-
-	mailRepo := mailInfrastructure.NewMailService()
-	mailController := mailControllers.NewMailController(mailRepo)
-	mailHandler := mailInterfaces.NewMailHandler(mailController)
 
 	// Configuración de rutas
 	bookRoutes.SetupBookRoutes(app, bookHandler)
 	adminRoutes.SetupAdminRoutes(app, adminHandler)
-	mailRoutes.SetupMailRoutes(app, mailHandler)
 
 	// Ruta de verificación de salud
 	app.Get("/health", func(c *fiber.Ctx) error {
