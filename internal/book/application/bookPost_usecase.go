@@ -1,4 +1,4 @@
-//api_hexagonal_go/internal/book/application/bookPost_usecase.go
+// api_hexagonal_go/internal/book/application/bookPost_usecase.go
 package application
 
 import (
@@ -6,17 +6,27 @@ import (
 	"api-joaquin/internal/book/domain/repositories"
 )
 
-
 type BookPostUseCase struct {
-	Repo repositories.BookRepository
+	Repo  repositories.BookRepository
+	Email repositories.IEmailRepository
 }
 
-
-func NewBookPostUseCase(repo repositories.BookRepository) *BookPostUseCase {
-	return &BookPostUseCase{Repo: repo}
+func NewBookPostUseCase(repo repositories.BookRepository, email repositories.IEmailRepository) *BookPostUseCase {
+	return &BookPostUseCase{
+		Repo:  repo,
+		Email: email,
+	}
 }
-
 
 func (uc *BookPostUseCase) Execute(book *domain.Book) error {
-	return uc.Repo.Create(book)
+	err := uc.Repo.Create(book)
+	if err != nil {
+		return err
+	}
+	err = uc.Email.SendMail(book)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

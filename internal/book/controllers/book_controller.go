@@ -14,9 +14,9 @@ type BookController struct {
 	DeleteUseCase *application.BookDeleteUseCase
 }
 
-func NewBookController(repo repositories.BookRepository) *BookController {
+func NewBookController(repo repositories.BookRepository, email repositories.IEmailRepository) *BookController {
 	return &BookController{
-		PostUseCase:   application.NewBookPostUseCase(repo),
+		PostUseCase:   application.NewBookPostUseCase(repo, email),
 		GetUseCase:    application.NewBookGetUseCase(repo),
 		PutUseCase:    application.NewBookPutUseCase(repo),
 		DeleteUseCase: application.NewBookDeleteUseCase(repo),

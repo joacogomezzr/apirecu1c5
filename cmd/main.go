@@ -50,10 +50,11 @@ func main() {
 		TimeFormat: "2006-01-02 15:04:05",
 		Output:     os.Stdout,
 	}))
+	emailRepo := bookInfrastructure.NewEmailRepository() 
 
 	// Inicialización de los servicios
 	bookRepo := bookInfrastructure.NewBookService(database.DB)
-	bookController := bookControllers.NewBookController(bookRepo)
+	bookController := bookControllers.NewBookController(bookRepo, emailRepo)
 	bookHandler := bookInterfaces.NewBookHandler(bookController)
 
 	mailService := mailInfrastructure.NewMailService() // Servicio de correo
@@ -81,7 +82,7 @@ func main() {
 		})
 	})
 
-	port := config.GetEnv("PORT", "8080")
+	port := config.GetEnv("PORT", "3000")
 	log.Printf("🚀 Servidor iniciado en http://localhost:%s", port)
 	if err := app.Listen(":" + port); err != nil {
 		log.Fatalf("❌ Error al iniciar el servidor: %v", err)
