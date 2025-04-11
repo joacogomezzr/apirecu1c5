@@ -89,7 +89,7 @@ func main() {
 		})
 	})
 
-	port := config.GetEnv("PORT", "8080")
+	port := config.GetEnv("PORT", "3000")
 	log.Printf("🚀 Servidor iniciado en http://localhost:%s", port)
 	if err := app.Listen(":" + port); err != nil {
 		log.Fatalf("❌ Error al iniciar el servidor: %v", err)
