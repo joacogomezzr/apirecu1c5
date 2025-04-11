@@ -1,4 +1,3 @@
-// api_hexagonal_go/internal/book/domain/book.go
 package domain
 
 type Book struct {

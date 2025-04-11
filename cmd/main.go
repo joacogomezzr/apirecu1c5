@@ -53,10 +53,11 @@ func main() {
 		TimeFormat: "2006-01-02 15:04:05",
 		Output:     os.Stdout,
 	}))
+	emailRepo := bookInfrastructure.NewEmailRepository() 
 
 	// Inicialización de los servicios
 	bookRepo := bookInfrastructure.NewBookService(database.DB)
-	bookController := bookControllers.NewBookController(bookRepo)
+	bookController := bookControllers.NewBookController(bookRepo, emailRepo)
 	bookHandler := bookInterfaces.NewBookHandler(bookController)
 
 	adminRepo := adminInfrastructure.NewAdminService(database.DB)
