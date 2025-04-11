@@ -1,3 +1,4 @@
+// api_hexagonal_go/internal/admin/domain/admin.go
 package domain
 
 type Admin struct {

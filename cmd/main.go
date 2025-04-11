@@ -5,12 +5,11 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
-
 	"github.com/gofiber/fiber/v2/middleware/logger"
+
 	"api-joaquin/config"
 	"api-joaquin/database"
 	"api-joaquin/pkg/middleware"
-
 
 	bookControllers "api-joaquin/internal/book/controllers"
 	bookInfrastructure "api-joaquin/internal/book/infrastructure"
@@ -21,6 +20,11 @@ import (
 	adminInfrastructure "api-joaquin/internal/admin/infrastructure"
 	adminInterfaces "api-joaquin/internal/admin/interface"
 	adminRoutes "api-joaquin/internal/admin/routes"
+
+	mailControllers "api-joaquin/internal/mailer/controllers"
+	mailInfrastructure "api-joaquin/internal/mailer/infrastructure"
+	mailInterfaces "api-joaquin/internal/mailer/interfaces"
+	mailRoutes "api-joaquin/internal/mailer/routes"
 )
 
 func main() {
@@ -44,13 +48,13 @@ func main() {
 
 	app.Use(middleware.SetupCORS())
 
-
 	app.Use(logger.New(logger.Config{
 		Format:     "${time} ${method} ${path} - ${status} - ${latency}\n",
 		TimeFormat: "2006-01-02 15:04:05",
 		Output:     os.Stdout,
 	}))
 
+	// Inicialización de los servicios
 	bookRepo := bookInfrastructure.NewBookService(database.DB)
 	bookController := bookControllers.NewBookController(bookRepo)
 	bookHandler := bookInterfaces.NewBookHandler(bookController)
@@ -59,9 +63,24 @@ func main() {
 	adminController := adminControllers.NewAdminController(adminRepo)
 	adminHandler := adminInterfaces.NewAdminHandler(adminController)
 
+	mailRepo := mailInfrastructure.NewMailService()
+	mailController := mailControllers.NewMailController(mailRepo)
+	mailHandler := mailInterfaces.NewMailHandler(mailController)
+
+	// Configuración de rutas
 	bookRoutes.SetupBookRoutes(app, bookHandler)
 	adminRoutes.SetupAdminRoutes(app, adminHandler)
+	mailRoutes.SetupMailRoutes(app, mailHandler)
 
+	// Ruta de verificación de salud
+	app.Get("/health", func(c *fiber.Ctx) error {
+		return c.JSON(fiber.Map{
+			"status":  "success",
+			"message": "API is running",
+		})
+	})
+
+	// Manejo de rutas no encontradas
 	app.Use(func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"status":  "error",

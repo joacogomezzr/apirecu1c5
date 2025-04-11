@@ -1,3 +1,4 @@
+// api_hexagonal_go/internal/admin/infrastructure/admin_service.go
 package infrastructure
 
 import (

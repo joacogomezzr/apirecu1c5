@@ -6,7 +6,7 @@ import (
 	"api-joaquin/internal/admin/domain/repositories"
 )
 
-type AdminController struct {
+type AdminController struct {	
 	PostUseCase   *application.AdminPostUseCase
 	GetUseCase    *application.AdminGetUseCase
 	PutUseCase    *application.AdminPutUseCase
